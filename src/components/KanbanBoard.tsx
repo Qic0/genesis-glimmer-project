@@ -100,7 +100,7 @@ const KanbanBoard = () => {
 
   return (
     <motion.div 
-      className="kanban-container py-8 px-4"
+      className="kanban-container pb-8 px-4"
       variants={containerVariants}
       initial="hidden"
       animate="visible"

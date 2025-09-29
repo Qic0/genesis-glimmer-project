@@ -209,18 +209,18 @@ export const WorkerDetailsDialog = ({ worker, open, onOpenChange }: WorkerDetail
                 <div className="flex items-start gap-6">
                   <div className="flex items-center gap-4">
                     <div className="relative">
-                      <Avatar className="h-20 w-20 flex-shrink-0">
+                      <Avatar className="h-32 w-32 flex-shrink-0">
                         <AvatarImage 
                           src={worker.avatar_url} 
                           alt={worker.full_name} 
                           className="object-cover"
                         />
-                        <AvatarFallback className="bg-primary/10 text-primary font-display font-semibold text-xl">
+                        <AvatarFallback className="bg-primary/10 text-primary font-display font-semibold text-3xl">
                           {worker.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || '?'}
                         </AvatarFallback>
                       </Avatar>
                       {/* Онлайн индикатор */}
-                      <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-white ${
+                      <div className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-full border-2 border-white ${
                         isUserOnline(worker.uuid_user) 
                           ? 'bg-green-500' 
                           : 'bg-gray-400'

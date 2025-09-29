@@ -372,10 +372,9 @@ export const DataTable = ({ title, data, columns, loading, isFetching, emptyMess
                   transition={{ duration: 0.3, delay: rowIndex * 0.03 }}
                   whileHover={{ 
                     backgroundColor: "hsl(var(--muted) / 0.8)",
-                    scale: 1.005,
                     transition: { duration: 0.2 }
                   }}
-                  whileTap={onRowClick ? { scale: 0.995 } : {}}
+                  whileTap={onRowClick ? { scale: 0.998 } : {}}
                 >
                   {columns.map((column, colIndex) => (
                     <motion.td 

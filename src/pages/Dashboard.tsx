@@ -25,8 +25,8 @@ const Dashboard = () => {
         animate="visible"
         variants={containerVariants}
       >
-        <div>
-          <div className="max-w-7xl mx-auto purposeful-space">
+        <div className="px-4 py-8">
+          <div className="max-w-7xl mx-auto">
             <PageHeader
               title="Панель заказов"
               description="Управление и мониторинг всех заказов"
@@ -42,7 +42,7 @@ const Dashboard = () => {
             />
           </div>
           
-          <div className="max-w-7xl mx-auto purposeful-space">
+          <div className="max-w-7xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

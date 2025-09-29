@@ -197,6 +197,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const intervalId = setInterval(async () => {
           try {
             await supabase.rpc('update_user_activity', { user_uuid: session.user.id });
+            
+            // Проверяем всех пользователей и обновляем статус на offline если последняя активность > 1 минуты
+            const { data: allUsers } = await supabase
+              .from('users')
+              .select('uuid_user, last_seen, status');
+            
+            if (allUsers) {
+              const now = new Date().getTime();
+              for (const user of allUsers) {
+                const lastSeen = user.last_seen ? new Date(user.last_seen).getTime() : 0;
+                const diffInMinutes = (now - lastSeen) / (1000 * 60);
+                
+                // Если прошло больше минуты и статус онлайн - обновляем на офлайн
+                if (diffInMinutes > 1 && user.status === 'online') {
+                  await supabase.rpc('set_user_offline', { user_uuid: user.uuid_user });
+                }
+              }
+            }
+            
             // Also refresh online users list to catch any missed updates
             await fetchOnlineUsers();
           } catch (error) {
@@ -295,12 +314,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Presence functions
   const isUserOnline = (userId: string): boolean => {
-    return onlineUsers.some(user => user.user_id === userId);
+    const user = onlineUsers.find(u => u.user_id === userId);
+    if (!user) return false;
+    
+    // Проверяем, была ли активность более минуты назад
+    const lastSeen = new Date(user.online_at).getTime();
+    const now = new Date().getTime();
+    const diffInMinutes = (now - lastSeen) / (1000 * 60);
+    
+    return diffInMinutes <= 1 && user.status === 'online';
   };
 
   const getUserStatus = (userId: string): 'online' | 'offline' => {
     const onlineUser = onlineUsers.find(user => user.user_id === userId);
-    return onlineUser?.status || 'offline';
+    if (!onlineUser) return 'offline';
+    
+    // Проверяем, была ли активность более минуты назад
+    const lastSeen = new Date(onlineUser.online_at).getTime();
+    const now = new Date().getTime();
+    const diffInMinutes = (now - lastSeen) / (1000 * 60);
+    
+    return diffInMinutes > 1 ? 'offline' : (onlineUser.status || 'offline');
   };
 
   const isAdmin = user?.role === 'admin';

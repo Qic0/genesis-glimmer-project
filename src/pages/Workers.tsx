@@ -115,9 +115,12 @@ const Workers = () => {
           </Avatar>
           {/* Онлайн индикатор */}
           <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
-            isUserOnline(row.uuid_user) 
-              ? 'bg-green-500' 
-              : 'bg-gray-400'
+            (() => {
+              const lastSeen = row.last_seen ? new Date(row.last_seen).getTime() : 0;
+              const now = new Date().getTime();
+              const diffInMinutes = (now - lastSeen) / (1000 * 60);
+              return diffInMinutes > 1 ? 'bg-gray-400' : (isUserOnline(row.uuid_user) ? 'bg-green-500' : 'bg-gray-400');
+            })()
           }`} />
         </div>
       )
@@ -129,10 +132,22 @@ const Workers = () => {
       key: 'online_status',
       header: 'Статус',
       render: (value: string, row: any) => {
-        // Попробуем сначала статус из базы, потом из AuthContext
-        const dbStatus = row.status; // статус напрямую из базы
-        const contextStatus = getUserStatus(row.uuid_user); // статус из AuthContext
-        const status = dbStatus === 'online' ? 'online' : contextStatus;
+        // Проверяем, была ли активность более минуты назад
+        const lastSeen = row.last_seen ? new Date(row.last_seen).getTime() : 0;
+        const now = new Date().getTime();
+        const diffInMinutes = (now - lastSeen) / (1000 * 60);
+        
+        // Если прошло более минуты с последней активности - офлайн
+        let status: 'online' | 'away' | 'offline';
+        if (diffInMinutes > 1) {
+          status = 'offline';
+        } else {
+          // Иначе используем статус из базы или контекста
+          const dbStatus = row.status;
+          const contextStatus = getUserStatus(row.uuid_user);
+          status = dbStatus === 'online' ? 'online' : contextStatus;
+        }
+        
         const statusConfig = {
           online: { label: 'Онлайн', className: 'bg-green-500/10 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800' },
           away: { label: 'Отошел', className: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800' },
